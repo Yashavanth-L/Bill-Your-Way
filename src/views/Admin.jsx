@@ -171,7 +171,7 @@ export default function Admin() {
     setNewTableNo('');
   };
 
-  const baseUrl = window.location.origin;
+  const baseUrl = window.location.origin + window.location.pathname.replace(/\/$/, '') + '/#';
 
   const filteredMenu = menu.filter(item => 
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
