@@ -9,7 +9,7 @@ export default function Navbar() {
   const { orders } = useOrders();
   const { currency, setCurrency } = useCurrency();
   const [muted, setMuted] = useState(sound.isMuted());
-  const [theme, setTheme] = useState(() => localStorage.getItem('aura_theme') || 'cosmic');
+  const [theme, setTheme] = useState(() => localStorage.getItem('aura_theme') || 'monochrome');
   const [showThemePicker, setShowThemePicker] = useState(false);
   const [timeStr, setTimeStr] = useState('');
 
@@ -40,6 +40,8 @@ export default function Navbar() {
   };
 
   const themes = [
+    { id: 'monochrome', name: 'Monochrome Dark', color: '#ffffff' },
+    { id: 'monochrome-light', name: 'Monochrome Light', color: '#18181b' },
     { id: 'cosmic', name: 'Cosmic Dark', color: '#8b5cf6' },
     { id: 'emerald', name: 'Emerald Luxe', color: '#10b981' },
     { id: 'gold', name: 'Midnight Gold', color: '#f59e0b' },
@@ -52,8 +54,8 @@ export default function Navbar() {
         
         {/* Brand Logo */}
         <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.75rem' }} onClick={() => sound.playTap()}>
-          <div style={{ background: 'linear-gradient(135deg, var(--primary), var(--secondary))', padding: '0.5rem', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px var(--primary-glow)' }}>
-            <Sparkles size={22} color="white" />
+          <div className="brand-logo-icon" style={{ background: 'linear-gradient(135deg, var(--primary), var(--secondary))', padding: '0.5rem', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 15px var(--primary-glow)' }}>
+            <Sparkles size={22} color={theme === 'monochrome' ? '#090a0c' : 'white'} />
           </div>
           <div>
             <h1 style={{ fontSize: '1.35rem', margin: 0, lineHeight: 1.1 }} className="text-gradient">Aura Dining</h1>

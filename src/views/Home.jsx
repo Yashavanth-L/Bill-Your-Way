@@ -46,8 +46,8 @@ export default function Home() {
         {/* Customer Portal Card */}
         <div className="glass glass-interactive" style={{ padding: '2.5rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'relative', overflow: 'hidden' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ background: 'linear-gradient(135deg, #ec4899, #8b5cf6)', padding: '0.85rem', borderRadius: '16px', color: 'white', boxShadow: '0 8px 20px rgba(236, 72, 153, 0.3)' }}>
-              <Utensils size={32} />
+            <div style={{ background: 'linear-gradient(135deg, var(--primary), var(--secondary))', padding: '0.85rem', borderRadius: '16px', color: 'var(--bg-darker)', boxShadow: '0 8px 20px var(--primary-glow)' }}>
+              <Utensils size={32} color="currentColor" />
             </div>
             <span className="badge badge-preparing">Contactless QR</span>
           </div>
@@ -92,8 +92,8 @@ export default function Home() {
         {/* Kitchen KDS Card */}
         <div className="glass glass-interactive" style={{ padding: '2.5rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'relative', overflow: 'hidden' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ background: 'linear-gradient(135deg, #06b6d4, #10b981)', padding: '0.85rem', borderRadius: '16px', color: 'white', boxShadow: '0 8px 20px rgba(6, 182, 212, 0.3)' }}>
-              <ChefHat size={32} />
+            <div style={{ background: 'linear-gradient(135deg, var(--accent), var(--primary))', padding: '0.85rem', borderRadius: '16px', color: 'var(--bg-darker)', boxShadow: '0 8px 20px var(--primary-glow)' }}>
+              <ChefHat size={32} color="currentColor" />
             </div>
             {activeOrdersCount > 0 ? (
               <span className="badge badge-pending">{activeOrdersCount} Pending Orders</span>
@@ -121,7 +121,7 @@ export default function Home() {
             to="/kitchen" 
             onClick={() => sound.playTap()}
             className="btn btn-primary" 
-            style={{ width: '100%', marginTop: 'auto', textDecoration: 'none', background: 'linear-gradient(135deg, #06b6d4, #10b981)' }}
+            style={{ width: '100%', marginTop: 'auto', textDecoration: 'none' }}
           >
             Open KDS Monitor <ArrowRight size={18} />
           </Link>
@@ -130,8 +130,8 @@ export default function Home() {
         {/* Admin Dashboard Card */}
         <div className="glass glass-interactive" style={{ padding: '2.5rem 2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', position: 'relative', overflow: 'hidden' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div style={{ background: 'linear-gradient(135deg, #8b5cf6, #f59e0b)', padding: '0.85rem', borderRadius: '16px', color: 'white', boxShadow: '0 8px 20px rgba(139, 92, 246, 0.3)' }}>
-              <LayoutDashboard size={32} />
+            <div style={{ background: 'linear-gradient(135deg, var(--secondary), var(--primary))', padding: '0.85rem', borderRadius: '16px', color: 'var(--bg-darker)', boxShadow: '0 8px 20px var(--primary-glow)' }}>
+              <LayoutDashboard size={32} color="currentColor" />
             </div>
             <span className="badge badge-ready">Manager Hub</span>
           </div>
@@ -154,7 +154,7 @@ export default function Home() {
             to="/admin" 
             onClick={() => sound.playTap()}
             className="btn btn-primary" 
-            style={{ width: '100%', marginTop: 'auto', textDecoration: 'none', background: 'linear-gradient(135deg, #8b5cf6, #f59e0b)' }}
+            style={{ width: '100%', marginTop: 'auto', textDecoration: 'none' }}
           >
             Launch Admin Dashboard <ArrowRight size={18} />
           </Link>
