@@ -9,7 +9,7 @@ import { compressImageFile } from '../utils/imageUtils';
 
 export default function Admin() {
   const { menu, addMenuItem, removeMenuItem, updateMenuItem, toggleStockStatus } = useMenu();
-  const { tables, addTable, removeTable, regenerateTableToken } = useTables();
+  const { tables, addTable, updateTable, removeTable, regenerateTableToken } = useTables();
   const { orders, clearTable } = useOrders();
   const { paymentDetails, updatePaymentDetails } = usePaymentDetails();
   const { currency, setCurrency, formatPrice } = useCurrency();
@@ -37,6 +37,7 @@ export default function Admin() {
   
   const [editId, setEditId] = useState(null);
   const [newTableNo, setNewTableNo] = useState('');
+  const [newTableCapacity, setNewTableCapacity] = useState(4);
   const [paymentForm, setPaymentForm] = useState(paymentDetails);
   const [activeTab, setActiveTab] = useState('menu'); // 'menu', 'tables', 'orders', 'payment'
   const [searchQuery, setSearchQuery] = useState('');
@@ -95,6 +96,7 @@ export default function Admin() {
   const totalRevenue = orders.filter(o => o.status === 'delivered').reduce((sum, o) => sum + o.total, 0);
   const activeOrdersCount = orders.filter(o => o.status !== 'delivered' && !o.paid).length;
   const occupiedTablesCount = tables.filter(t => orders.some(o => o.tableNo === t.number.toString() && !o.paid)).length;
+  const totalSeatingCapacity = tables.reduce((sum, t) => sum + (t.capacity || 4), 0);
   const occupancyRate = tables.length > 0 ? Math.round((occupiedTablesCount / tables.length) * 100) : 0;
 
   const handleSubmit = (e) => {
@@ -166,9 +168,11 @@ export default function Admin() {
     e.preventDefault();
     if (!newTableNo) return;
     sound.playTap();
-    addTable(parseInt(newTableNo, 10));
-    showToast(`Table ${newTableNo} created successfully`, 'success');
+    const cap = parseInt(newTableCapacity, 10) || 4;
+    addTable(parseInt(newTableNo, 10), cap);
+    showToast(`Table ${newTableNo} (${cap} seats) created successfully`, 'success');
     setNewTableNo('');
+    setNewTableCapacity(4);
   };
 
   const baseUrl = window.location.origin + window.location.pathname.replace(/\/$/, '') + '/#';
@@ -280,8 +284,9 @@ export default function Admin() {
             <Users size={28} />
           </div>
           <div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700 }}>TABLE OCCUPANCY</div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 700 }}>OCCUPANCY & SEATS</div>
             <div style={{ fontSize: '1.6rem', fontWeight: 800, color: 'var(--warning)' }}>{occupancyRate}% ({occupiedTablesCount}/{tables.length})</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '2px' }}>{totalSeatingCapacity} Total Seats</div>
           </div>
         </div>
 
@@ -612,10 +617,54 @@ export default function Admin() {
                   value={newTableNo}
                   onChange={e => setNewTableNo(e.target.value)}
                   placeholder="e.g. 5"
+                  min="1"
                   required
                 />
               </div>
-              <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '0.5rem' }}>
+
+              <div className="input-group">
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <Users size={15} color="var(--primary)" /> Occupancy Count (Seats / Guests)
+                </label>
+                <input 
+                  type="number" 
+                  min="1"
+                  max="50"
+                  className="input-field" 
+                  value={newTableCapacity}
+                  onChange={e => setNewTableCapacity(e.target.value)}
+                  placeholder="e.g. 4"
+                  required
+                />
+                
+                {/* Quick capacity preset chips */}
+                <div style={{ display: 'flex', gap: '0.4rem', marginTop: '0.5rem', flexWrap: 'wrap' }}>
+                  {[2, 4, 6, 8, 10, 12].map(cap => (
+                    <button
+                      key={cap}
+                      type="button"
+                      onClick={() => { setNewTableCapacity(cap); sound.playTap(); }}
+                      style={{
+                        flex: 1,
+                        padding: '0.3rem 0.4rem',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        borderRadius: '8px',
+                        border: Number(newTableCapacity) === cap ? '1px solid var(--primary)' : '1px solid var(--glass-border)',
+                        background: Number(newTableCapacity) === cap ? 'var(--primary-glow)' : 'rgba(255,255,255,0.05)',
+                        color: Number(newTableCapacity) === cap ? 'var(--primary)' : 'var(--text-muted)',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        minWidth: '36px'
+                      }}
+                    >
+                      {cap}p
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '0.75rem' }}>
                 <Plus size={18} /> Add Table QR
               </button>
             </form>
@@ -623,24 +672,72 @@ export default function Admin() {
 
           {/* Tables Grid */}
           <div>
-            <h3 style={{ marginBottom: '1.25rem' }}>Active Dining Tables ({tables.length})</h3>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h3 style={{ margin: 0 }}>Active Dining Tables ({tables.length})</h3>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                Total Seating: <span className="text-gradient" style={{ fontWeight: 800 }}>{totalSeatingCapacity} Guests</span>
+              </span>
+            </div>
+
             <div className="grid-cards">
               {tables.sort((a,b) => a.number - b.number).map(table => {
                 const qrUrl = `${baseUrl}/user/${table.number}?token=${table.token}`;
                 const activeTableOrders = orders.filter(o => o.tableNo === table.number.toString() && !o.paid);
                 const isOccupied = activeTableOrders.length > 0;
                 const activeTotal = activeTableOrders.reduce((sum, o) => sum + o.total, 0);
+                const capacity = table.capacity || 4;
 
                 return (
                   <div key={table.id} className="glass" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center', marginBottom: '1rem' }}>
-                      <h4 style={{ fontSize: '1.3rem', margin: 0 }}>Table {table.number}</h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
+                      <div>
+                        <h4 style={{ fontSize: '1.3rem', margin: 0 }}>Table {table.number}</h4>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', marginTop: '0.2rem' }}>
+                          <Users size={13} color="var(--primary)" /> {capacity} Persons Capacity
+                        </span>
+                      </div>
                       <span className={`badge ${isOccupied ? 'badge-pending' : 'badge-ready'}`}>
                         {isOccupied ? `Occupied (${formatPrice(activeTotal)})` : 'Free'}
                       </span>
                     </div>
 
-                    <div style={{ background: 'white', padding: '0.85rem', borderRadius: '16px', marginBottom: '1rem', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }}>
+                    {/* Quick Seats Capacity Adjuster */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.25)', padding: '0.35rem 0.65rem', borderRadius: '10px', width: '100%', marginBottom: '0.85rem', border: '1px solid var(--glass-border)' }}>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                        <Users size={12} /> Seats:
+                      </span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newCap = Math.max(1, capacity - 1);
+                            updateTable(table.id, { capacity: newCap });
+                            sound.playTap();
+                          }}
+                          style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', width: '22px', height: '22px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem' }}
+                          title="Decrease seats"
+                        >
+                          -
+                        </button>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 800, minWidth: '22px', textAlign: 'center', color: 'var(--primary)' }}>
+                          {capacity}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newCap = capacity + 1;
+                            updateTable(table.id, { capacity: newCap });
+                            sound.playTap();
+                          }}
+                          style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', width: '22px', height: '22px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.85rem' }}
+                          title="Increase seats"
+                        >
+                          +
+                        </button>
+                      </div>
+                    </div>
+
+                    <div style={{ background: 'white', padding: '0.85rem', borderRadius: '16px', marginBottom: '0.85rem', boxShadow: '0 4px 15px rgba(0,0,0,0.2)' }}>
                       <QRCodeCanvas value={qrUrl} size={140} />
                     </div>
 

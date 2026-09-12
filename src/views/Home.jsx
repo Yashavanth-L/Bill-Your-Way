@@ -71,9 +71,10 @@ export default function Home() {
                   to={`/user/${t.number}?token=${t.token}`}
                   onClick={() => sound.playTap()}
                   className="btn btn-secondary"
-                  style={{ padding: '0.4rem', fontSize: '0.8rem', textAlign: 'center' }}
+                  style={{ padding: '0.4rem 0.2rem', fontSize: '0.78rem', textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.1rem' }}
                 >
-                  T-{t.number}
+                  <span style={{ fontWeight: 800 }}>T-{t.number}</span>
+                  <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{t.capacity || 4} seats</span>
                 </Link>
               ))}
             </div>

@@ -61,8 +61,12 @@ export default function User() {
                 to={`/user/${t.number}?token=${t.token}`} 
                 onClick={() => sound.playTap()}
                 className="btn btn-secondary"
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.2rem', padding: '0.75rem' }}
               >
-                Table {t.number}
+                <span style={{ fontWeight: 800 }}>Table {t.number}</span>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <Users size={12} /> {t.capacity || 4} Guests
+                </span>
               </Link>
             ))}
           </div>
@@ -170,9 +174,14 @@ export default function User() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ background: 'linear-gradient(135deg, var(--primary), var(--secondary))', color: 'white', padding: '0.6rem 1.25rem', borderRadius: '14px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem', boxShadow: '0 4px 15px var(--primary-glow)' }}>
+          <div style={{ background: 'linear-gradient(135deg, var(--primary), var(--secondary))', color: 'white', padding: '0.6rem 1.25rem', borderRadius: '14px', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.65rem', boxShadow: '0 4px 15px var(--primary-glow)' }}>
             <Sparkles size={18} />
             <span>Table {tableNo}</span>
+            {table && (
+              <span style={{ fontSize: '0.8rem', background: 'rgba(0,0,0,0.25)', padding: '0.2rem 0.6rem', borderRadius: '9999px', display: 'inline-flex', alignItems: 'center', gap: '0.3rem', fontWeight: 600 }}>
+                <Users size={13} /> {table.capacity || 4} Seats
+              </span>
+            )}
           </div>
         </div>
       </div>

@@ -113,11 +113,23 @@ if (!localStorage.getItem('restaurant_payment_details')) {
 
 if (!localStorage.getItem('restaurant_tables')) {
   localStorage.setItem('restaurant_tables', JSON.stringify([
-    { id: '1', number: 1, token: 'table01secret' },
-    { id: '2', number: 2, token: 'table02secret' },
-    { id: '3', number: 3, token: 'table03secret' },
-    { id: '4', number: 4, token: 'table04secret' },
+    { id: '1', number: 1, capacity: 4, token: 'table01secret' },
+    { id: '2', number: 2, capacity: 2, token: 'table02secret' },
+    { id: '3', number: 3, capacity: 6, token: 'table03secret' },
+    { id: '4', number: 4, capacity: 4, token: 'table04secret' },
   ]));
+} else {
+  // Ensure existing tables have capacity field
+  try {
+    const existingTables = JSON.parse(localStorage.getItem('restaurant_tables'));
+    const updatedTables = existingTables.map(t => ({
+      capacity: 4,
+      ...t
+    }));
+    localStorage.setItem('restaurant_tables', JSON.stringify(updatedTables));
+  } catch (e) {
+    // ignore parse error
+  }
 }
 
 export function useMenu() {
@@ -236,9 +248,23 @@ export function useTables() {
     };
   }, []);
 
-  const addTable = (number) => {
+  const addTable = (number, capacity = 4) => {
     if (tables.find(t => t.number === number)) return;
-    const newTables = [...tables, { id: Date.now().toString(), number, token: Math.random().toString(36).substring(2, 15) }];
+    const newTables = [
+      ...tables, 
+      { 
+        id: Date.now().toString(), 
+        number, 
+        capacity: Math.max(1, parseInt(capacity, 10) || 4),
+        token: Math.random().toString(36).substring(2, 15) 
+      }
+    ];
+    localStorage.setItem('restaurant_tables', JSON.stringify(newTables));
+    window.dispatchEvent(new Event('tables_updated'));
+  };
+
+  const updateTable = (id, updates) => {
+    const newTables = tables.map(t => t.id === id ? { ...t, ...updates } : t);
     localStorage.setItem('restaurant_tables', JSON.stringify(newTables));
     window.dispatchEvent(new Event('tables_updated'));
   };
@@ -255,7 +281,7 @@ export function useTables() {
     window.dispatchEvent(new Event('tables_updated'));
   };
 
-  return { tables, addTable, removeTable, regenerateTableToken };
+  return { tables, addTable, updateTable, removeTable, regenerateTableToken };
 }
 
 export function usePaymentDetails() {

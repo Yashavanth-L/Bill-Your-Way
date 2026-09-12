@@ -1,5 +1,5 @@
-import { useOrders } from '../hooks/useStore';
-import { Clock, CheckCircle, ChefHat, Play, Home, CheckSquare, Square, AlertCircle, Filter, Sparkles, Bell, Lock, KeyRound, LogOut, ShieldCheck } from 'lucide-react';
+import { useOrders, useTables } from '../hooks/useStore';
+import { Clock, CheckCircle, ChefHat, Play, Home, CheckSquare, Square, AlertCircle, Filter, Sparkles, Bell, Lock, KeyRound, LogOut, ShieldCheck, Users } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { sound } from '../utils/sound';
@@ -7,6 +7,7 @@ import { showToast } from '../utils/toast';
 
 export default function Kitchen() {
   const { orders, updateOrderStatus } = useOrders();
+  const { tables } = useTables();
   const [now, setNow] = useState(Date.now());
   const [statusFilter, setStatusFilter] = useState('active'); // 'active', 'pending', 'preparing', 'ready', 'delivered'
   const [checkedItems, setCheckedItems] = useState({}); // { `${orderId}-${itemIdx}`: boolean }
@@ -193,6 +194,8 @@ export default function Kitchen() {
             }
           }
 
+          const tableInfo = tables.find(t => t.number.toString() === order.tableNo);
+
           return (
             <div 
               key={order.id} 
@@ -208,8 +211,13 @@ export default function Kitchen() {
               {/* Card Top Info */}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                     <h3 style={{ fontSize: '1.6rem', margin: 0 }}>Table {order.tableNo}</h3>
+                    {tableInfo && (
+                      <span style={{ fontSize: '0.75rem', background: 'rgba(255,255,255,0.1)', padding: '0.15rem 0.45rem', borderRadius: '6px', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.2rem' }}>
+                        <Users size={11} /> {tableInfo.capacity || 4}p
+                      </span>
+                    )}
                     <span style={{ fontSize: '0.8rem', opacity: 0.6 }}>#{order.id.slice(-4)}</span>
                   </div>
                   <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'block', marginTop: '0.2rem' }}>
